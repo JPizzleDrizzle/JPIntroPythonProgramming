@@ -33,6 +33,14 @@ class ArmComponent:
         #          stored in the class
         self.name = name
         self.color = color
+        self.shape_to_use = shape_to_use
+        self.link_length = 2.0
+        self.link_width = 2.0
+        self.og_size = 2.0
+        self.length_ratio = self.link_length / self.og_size
+        self.width_ratio = self.link_width / self.og_size
+        self.current_angle = 0.0
+        self.rotate_angle = 0.0
 
         # Points - one of the nice things about using a class is you can do some "fancy" initialization. In
         #  this case we're going to duplicate the last point in pts and make sure we have a 3xn+1 matrix
@@ -62,6 +70,24 @@ class ArmComponent:
         # GUIDES Step 2: Make sure you change get_shape_matrix and get_pose_matrix to return the matrices you create
         # YOUR CODE HERE
 
+        # mat_resize_shape
+        self.mat_resize_shape = np.identity(3)
+        scale_matrix = mt.make_scale_matrix(self.length_ratio, self.width_ratio)
+
+        self.mat_resize_shape = scale_matrix @ self.mat_resize_shape
+
+        # mat_rotate
+        self.mat_rotate = np.identity(3)
+        rotation_matrix = mt.make_rotation_matrix(np.deg2rad(self.current_angle + self.rotate_angle))
+
+        self.mat_rotate = rotation_matrix @ self.mat_rotate
+
+        # mat_translation_shape
+        self.mat_translate_shape = np.identity(3)
+        translation_matrix = mt.make_translation_matrix(self.length_ratio * self.og_size / 2, 0)
+
+        self.mat_translate_shape = translation_matrix @ self.mat_translate_shape
+
 
     # Using the staticmethod decorator like this means that this method does not
     #  have/need a self pointer (notice no self)
@@ -83,18 +109,22 @@ class ArmComponent:
         #  Add a return statement at the end
         #  If you're confused, look at points_in_a_wedge, above
         # YOUR CODE HERE
+        pts_square = np.ones((3, 4))
+        pts_square[0, :] = [-1, 1, 1, -1]
+        pts_square[1, :] = [-1, -1, 1, 1]
+        return pts_square
 
     def get_shape_matrix(self):
         """ Return the shape matrix"""
         # YOUR CODE HERE
         # GUIDES STEP 2: Change this to return your shape matrix
-        return ...
+        return self.mat_resize_shape
     
     def get_pose_matrix(self):
         """ Return the pose matrix"""
         # YOUR CODE HERE
         # GUIDES STEP 2: Change this to return your pose matrix
-        return ...
+        return self.mat_rotate @ self.mat_resize_shape
 
     def set_to_base_shape(self, base_width=1.0, base_height=0.5):
         """ Position and orient the base of the arm (the wedge-shape at the bottom)
