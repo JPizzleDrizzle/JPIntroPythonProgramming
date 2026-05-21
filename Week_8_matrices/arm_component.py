@@ -233,8 +233,8 @@ class ArmComponent:
         else:
             mat_translate2 = mt.make_translation_matrix(0, -palm_width / 2)
 
-        self.base_pos = mat_translate2
         mat_finger = mat_translate2 @ mat_rotation @ mat_translate1 @ mat_scale
+        self.base_pos = mat_translate2
         self.mat_shape = mat_finger
 
     def set_pose_matrix(self, pose_matrix):
@@ -257,18 +257,19 @@ class ArmComponent:
         #   There are lots of ways to do this - don't forget you can add more variables in __init__.
         #   You'll probably want to add something to set_to_finger_shape...
         #  Again, use the mt.make_xx_matrix routines, don't just make an array
-        pose_matrix = mt.make_rotation_matrix(rot_amt)
-
-        # if self.is_finger:
-        #     finger_x, finger_y = mt.get_dx_dy_from_matrix(self.mat_shape)
-        #     if self.is_top:
-        #         translate_base_to_origin = np.identity(3)
-        #         pose_matrix = translate_base_to_origin @ self.mat_shape
-        #     else:
-        #         translate_base_to_origin = np.linalg.inv(self.base_pos) 
-        #         pose_matrix = translate_base_to_origin @ self.mat_pose
-        # else:
-        #     pass
+        if self.is_finger:
+            if self.is_top:
+                translate_base_to_origin = np.linalg.inv(self.base_pos)
+                rotate_finger = mt.make_rotation_matrix(rot_amt)
+                translate_back = self.base_pos
+            else:
+                translate_base_to_origin = np.linalg.inv(self.base_pos)
+                rotate_finger = mt.make_rotation_matrix(-rot_amt)
+                translate_back = self.base_pos
+                
+            pose_matrix = translate_back @ rotate_finger @ translate_base_to_origin
+        else:
+            pose_matrix = mt.make_rotation_matrix(rot_amt)
         # YOUR CODE HERE
         # Call the set_pose_matrix method to actually save the matrix
         self.set_pose_matrix(pose_matrix=pose_matrix)
