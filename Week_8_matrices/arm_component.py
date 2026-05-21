@@ -41,6 +41,13 @@ class ArmComponent:
         self.base_height = 2.0
         self.current_angle = 0.0
         self.og_dims = 2.0
+
+        self.is_finger = False
+        self.is_top = False
+        self.finger_length = 0.075
+        self.finger_width = 0.025
+        self.base_pos = np.identity(3)
+
         self.band_name = "blank"
 
         # Points - one of the nice things about using a class is you can do some "fancy" initialization. In
@@ -209,6 +216,7 @@ class ArmComponent:
         # You must use the mt.make_scale_matrix etc from matrix_routines.py to build the matrix from scales, rotations and
         #   translations - do NOT just make a numpy array
         # YOUR CODE HERE
+        self.is_finger = True
         mat_finger = self.mat_shape
         self.current_angle = np.deg2rad(-90)
 
@@ -220,10 +228,12 @@ class ArmComponent:
         mat_rotation = mt.make_rotation_matrix(self.current_angle)
 
         if b_is_top:
+            self.is_top = True
             mat_translate2 = mt.make_translation_matrix(0, palm_width / 2)
         else:
             mat_translate2 = mt.make_translation_matrix(0, -palm_width / 2)
 
+        self.base_pos = mat_translate2
         mat_finger = mat_translate2 @ mat_rotation @ mat_translate1 @ mat_scale
         self.mat_shape = mat_finger
 
@@ -247,8 +257,18 @@ class ArmComponent:
         #   There are lots of ways to do this - don't forget you can add more variables in __init__.
         #   You'll probably want to add something to set_to_finger_shape...
         #  Again, use the mt.make_xx_matrix routines, don't just make an array
-        if 
         pose_matrix = mt.make_rotation_matrix(rot_amt)
+
+        # if self.is_finger:
+        #     finger_x, finger_y = mt.get_dx_dy_from_matrix(self.mat_shape)
+        #     if self.is_top:
+        #         translate_base_to_origin = np.identity(3)
+        #         pose_matrix = translate_base_to_origin @ self.mat_shape
+        #     else:
+        #         translate_base_to_origin = np.linalg.inv(self.base_pos) 
+        #         pose_matrix = translate_base_to_origin @ self.mat_pose
+        # else:
+        #     pass
         # YOUR CODE HERE
         # Call the set_pose_matrix method to actually save the matrix
         self.set_pose_matrix(pose_matrix=pose_matrix)
