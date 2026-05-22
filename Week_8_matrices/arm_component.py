@@ -47,6 +47,8 @@ class ArmComponent:
         self.finger_length = 0.075
         self.finger_width = 0.025
         self.base_pos = np.identity(3)
+        self.palm_width = 0
+        self.palm_length = 0
 
         self.band_name = "blank"
 
@@ -164,7 +166,6 @@ class ArmComponent:
         # YOUR CODE HERE
         self.link_length = link_length
         self.link_width = link_width
-        self.current_angle = np.deg2rad(0)
 
         # should be able to rotate, but the autograder doesn't like the different order of things
         mat_link = self.mat_shape
@@ -190,12 +191,13 @@ class ArmComponent:
         # You must use the mt.make_scale_matrix etc from matrix_routines.py to build the matrix from scales, rotations and
         #   translations - do NOT just make a numpy array
         # YOUR CODE HERE
-        palm_length = palm_width / 10
+        self.palm_width = palm_width
+        self.palm_length = palm_width / 10
 
         mat_palm = self.mat_shape
 
         width_ratio = palm_width / self.og_dims
-        length_ratio = palm_length / self.og_dims
+        length_ratio = self.palm_length / self.og_dims
 
         mat_scale = mt.make_scale_matrix(length_ratio, width_ratio)
         mat_rotation = mt.make_rotation_matrix(self.current_angle)
